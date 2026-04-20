@@ -1,0 +1,78 @@
+/* Base custom classes from the design system for specific complex UI elements */
+
+/* The signature teal panel */
+.panel {
+  background: linear-gradient(180deg, var(--teal-panel-light) 0%, var(--teal-panel) 100%);
+  border-radius: 20px;
+  padding: 56px 72px;
+  box-shadow: 0 2px 8px rgba(0, 122, 117, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sparkle ornament */
+.sparkle {
+  position: absolute;
+  right: 40px; bottom: 40px;
+  width: 32px; height: 32px;
+  color: var(--teal-stripe);
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes up-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes up-pop  { from { opacity: 0; transform: translateY(6px) scale(0.98); }
+                     to   { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* The signature teal panel */
+.panel {
+  background: linear-gradient(180deg, var(--mint-panel-light) 0%, var(--mint-panel) 100%);
+  border-radius: 20px;
+  padding: 56px 72px;
+  box-shadow: 0 2px 8px rgba(0, 122, 117, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+.panel-tall { min-height: 560px; }
+.panel-flat {
+  /* for list-heavy views: no mint bg, just white page */
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Sparkle ornament (bottom-right of main, AI accent) */
+.sparkle {
+  position: absolute;
+  right: 40px; bottom: 40px;
+  width: 32px; height: 32px;
+  color: var(--mint-stripe);
+  pointer-events: none;
+}
+
+/* ---- Titles ---------------------------------------------------------- */
+.page-title {
+  font-family: var(--font-display);
+  font-size: 36px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.01em;
+  margin: 0 0 28px;
+  line-height: 1.15;
+}
+.page-title .title-light { font-weight: 500; color: var(--ink); }
+
+.screen-title {
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.015em;
+  margin: 0; text-align: center;
+  line-height: 1.2;
+}
+.screen-subtitle {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink-2);
+  text-align: center;
+  margin: 12px auto 0;
+  max-width: 460px;
+  line-height: 1.55;
+}

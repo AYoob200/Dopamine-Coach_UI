@@ -1,0 +1,129 @@
+/* ---- Coach entry — consistent with Ongoing/Upcoming/Finished ---------- */
+.coach-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .coach-grid { grid-template-columns: 1fr; }
+}
+
+.coach-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 24px 26px 20px;
+  display: flex; flex-direction: column; gap: 20px;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.coach-card:focus-within { border-color: var(--mint-stripe); }
+.coach-card-head { display: flex; flex-direction: column; gap: 4px; }
+.coach-card-label {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.coach-card-sub {
+  font-family: var(--font-body);
+  font-size: 13px; color: var(--ink-3);
+  line-height: 1.45;
+}
+
+.coach-field { display: flex; flex-direction: column; gap: 6px; }
+.coach-field-label {
+  font-family: var(--font-body);
+  font-size: 10px; font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.coach-field .input, .coach-field .textarea { border-width: 1.25px; }
+
+.coach-nudges { display: flex; flex-direction: column; gap: 8px; margin-top: -4px; }
+.coach-nudges-label {
+  font-family: var(--font-body);
+  font-size: 10px; font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.coach-nudges-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.coach-nudge {
+  font-family: var(--font-body);
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-2);
+  background: var(--paper-2);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.coach-nudge:hover {
+  background: var(--mint-soft);
+  color: var(--green);
+  border-color: #BFE2DE;
+}
+
+.coach-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(0, 122, 117, 0.18);
+  margin-top: 4px;
+}
+.coach-foot-hint {
+  font-family: var(--font-body);
+  font-size: 12px; color: var(--ink-3);
+}
+
+/* Aside */
+.coach-aside { display: flex; flex-direction: column; gap: 12px; }
+.coach-aside-card {
+  background: linear-gradient(180deg, var(--surface) 0%, var(--paper-2) 100%);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+}
+.coach-aside-label {
+  font-family: var(--font-body);
+  font-size: 10px; font-weight: 700;
+  color: var(--ink-3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.coach-steps-list {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.coach-steps-list li {
+  font-family: var(--font-body);
+  font-size: 13px; color: var(--ink-2);
+  display: flex; align-items: center; gap: 10px;
+}
+.coach-steps-num {
+  width: 20px; height: 20px; border-radius: 999px;
+  background: var(--mint-soft);
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.coach-recent { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.coach-recent-item {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px; color: var(--ink);
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+.coach-recent-item:hover { background: var(--surface); color: var(--green); }
+.coach-recent-item svg { color: var(--ink-3); }
+.coach-recent-item:hover svg { color: var(--green); }

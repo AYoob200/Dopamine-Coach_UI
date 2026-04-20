@@ -1,0 +1,71 @@
+/* ---- Focus stage: full-screen overlay (covers sidebar too) ---- */
+.focus-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background: linear-gradient(180deg, #f0faf8 0%, #e4f5f2 100%);
+}
+[data-theme="dark"] .focus-stage {
+  background: linear-gradient(180deg, #0a1e1c 0%, #0d2420 100%);
+}
+
+/* ---- Survey card — fills the focus-card width, centered ---- */
+.survey-card {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.survey-meta { font-size: 11px; font-weight: 600; color: var(--ink-2); letter-spacing: 0.1em; margin-bottom: 10px; text-align: center; }
+.survey-progress {
+  height: 4px; background: rgba(15,76,58,0.1); border-radius: 2px; overflow: hidden; position: relative;
+}
+.survey-progress-fill {
+  position: absolute; inset: 0; background: var(--green);
+  transform-origin: left; width: 100%;
+  animation: drain 4s linear forwards;
+}
+@keyframes drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.survey-question {
+  font-family: var(--font-display);
+  font-size: 26px; font-weight: 600;
+  color: var(--ink); text-align: center;
+  margin: 32px 0 36px; line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.survey-scale { display: flex; justify-content: space-between; gap: 12px; }
+.survey-dot {
+  flex: 1;
+  height: 64px;
+  border-radius: 14px;
+  border: 1.5px solid var(--hairline);
+  background: var(--surface); color: var(--ink-2);
+  font-family: var(--font-display); font-size: 20px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+  cursor: pointer;
+}
+.survey-dot:hover { border-color: var(--green); color: var(--ink); transform: translateY(-2px); }
+.survey-dot.selected { background: var(--green); color: #FFFFFF; border-color: var(--green); }
+.survey-scale-labels { display: flex; justify-content: space-between; margin-top: 14px; font-size: 11px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.wisdom {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.01em;
+  line-height: 1.25;
+  max-width: 480px; text-align: center; margin: 0 0 24px;
+}
+.wisdom-sub {
+  font-family: var(--font-body);
+  font-size: 14px; color: var(--ink-2);
+  text-align: center;
+  max-width: 420px; margin: 0 auto 36px;
+  line-height: 1.55;
+}

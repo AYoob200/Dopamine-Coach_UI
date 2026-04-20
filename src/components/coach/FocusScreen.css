@@ -1,0 +1,123 @@
+/* ---- Focus stage (timer + survey + recovery) ------------------------- */
+.focus-stage {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 32px; min-height: calc(100vh - 80px);
+}
+
+/* Full-bleed focus screen — nothing but the timer and the 2x2 pad */
+.focus-stage-bare {
+  position: fixed; inset: 0;
+  background: linear-gradient(180deg, var(--mint-panel-light) 0%, var(--mint-panel) 100%);
+  padding: 0; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.focus-stage-bare .focus-center {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 36px;
+}
+.focus-stage-bare .focus-step-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 600;
+  color: var(--ink); letter-spacing: -0.01em;
+  text-align: center;
+  margin: 0;
+}
+
+/* 2x2 icon pad — bottom-left of viewport */
+.focus-pad {
+  position: fixed;
+  left: 32px; bottom: 32px;
+  display: grid;
+  grid-template-columns: repeat(2, 64px);
+  grid-template-rows: repeat(2, 64px);
+  gap: 10px;
+  z-index: 11;
+}
+.focus-sq {
+  width: 64px; height: 64px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.focus-sq:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.10); }
+.focus-sq:active { transform: translateY(0); }
+
+/* Add time — amber */
+.focus-sq-add {
+  background: oklch(from #FFF4DB l c h / 1);
+  color: #B6791F;
+  border-color: #F1D79A;
+}
+[data-theme="dark"] .focus-sq-add { background: #2A2310; color: #D4943A; border-color: #4A3A1A; }
+.focus-sq-add:hover { background: #FFE9B5; }
+[data-theme="dark"] .focus-sq-add:hover { background: #332B14; }
+
+/* Restart — neutral slate (reset) */
+.focus-sq-restart {
+  background: var(--paper-2);
+  color: #4B5B66;
+  border-color: #D7DEE3;
+}
+.focus-sq-restart:hover { background: var(--paper-2); }
+
+/* End session — red */
+.focus-sq-end {
+  background: #FDECEC;
+  color: #C4402E;
+  border-color: #F3C2BB;
+}
+[data-theme="dark"] .focus-sq-end { background: #2A1010; color: #E06050; border-color: #4A2020; }
+.focus-sq-end:hover { background: #F9D9D5; }
+[data-theme="dark"] .focus-sq-end:hover { background: #331414; }
+
+/* Complete step — teal/green (success, brand) */
+.focus-sq-complete {
+  background: var(--green);
+  color: #FFFFFF;
+  border-color: var(--green);
+}
+.focus-sq-complete:hover { background: var(--green-hover); border-color: var(--green-hover); }
+
+.focus-card {
+  background: transparent;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: none;
+  width: 100%;
+  max-width: 860px;
+  display: flex; flex-direction: column;
+  align-items: stretch;
+}
+.focus-step-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 600;
+  color: var(--ink); text-align: center;
+  margin: 0 0 36px;
+}
+.hourglass-wrap { width: 160px; height: 240px; margin-bottom: 44px; }
+
+.focus-controls {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; width: 100%; max-width: 420px;
+}
+.focus-btn {
+  font-family: var(--font-body);
+  font-size: 13px; font-weight: 600;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.focus-btn:hover { background: var(--paper-2); color: var(--ink); }
+.focus-btn.primary { background: var(--green); color: #FFFFFF; grid-column: span 2; }
+.focus-btn.primary:hover { background: var(--green-hover); }

@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ---- Color: Paper & Ink (DopaDrive) ----------------------------------- */
+    --paper:        #FAFBFB;
+    --paper-2:      #F1F7F6;
+    --hairline:     #E3EBEA;
+    
+    --ink:          #1F2A36;
+    --ink-2:        #47566A;
+    --ink-3:        #7A8A98;
+    --ink-4:        #A9B5BE;
+    --ink-5:        #CFD7DC;
+
+    /* ---- Color: Teal (DopaDrive) ------------------------------------------ */
+    --teal:             #00B2AC;
+    --teal-hover:       #009691;
+    --teal-press:       #007A75;
+    --teal-deep:        #005853;
+    --teal-panel:       #BEE5E2;
+    --teal-panel-light: #DCEFEE;
+    --teal-stripe:      #00908B;
+    --teal-soft:        #D0EEEC;
+    --teal-tint:        #E8F5F4;
+
+    /* ---- Missing variables used by styles.css ---------------------------- */
+    --green:            var(--teal);
+    --green-hover:      var(--teal-hover);
+    --green-press:      var(--teal-press);
+    --mint-panel:       var(--teal-panel);
+    --mint-panel-light: var(--teal-panel-light);
+    --mint-soft:        var(--teal-soft);
+    --mint-stripe:      var(--teal-stripe);
+    
+    --font-body:        'Inter', sans-serif;
+    --font-display:     'DM Sans', 'Inter', sans-serif;
+    
+    --shadow-focus:     0 0 0 3px rgba(0, 178, 172, 0.2);
+    --shadow-xs:        0 2px 4px rgba(0, 0, 0, 0.05);
+    
+    --sidebar-w:        260px;
+    --text-base:        16px;
+    --text-sm:          14px;
+    /* Semantic mappings for DopaDrive */
+    --bg:             var(--paper);
+    --surface:        #FFFFFF;
+    --surface-raised: #FFFFFF;
+    --fg-1:           var(--ink);
+    --fg-2:           var(--ink-2);
+    --fg-3:           var(--ink-3);
+    --fg-muted:       var(--ink-4);
+    --accent:         var(--teal);
+    --accent-fg:      #FFFFFF;
+    --border:         var(--hairline);
+
+    /* ---- shadcn/ui defaults mapped to DopaDrive where applicable ---------- */
+    --background: 180 33% 98%; /* #FAFBFB */
+    --foreground: 212 27% 17%; /* #1F2A36 */
+
+    --card: 0 0% 100%;
+    --card-foreground: 212 27% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 212 27% 17%;
+
+    --primary: 178 100% 35%; /* #00B2AC */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 174 54% 87%; /* #D0EEEC */
+    --secondary-foreground: 178 100% 35%;
+
+    --muted: 214 20% 90%;
+    --muted-foreground: 206 13% 53%; /* #7A8A98 */
+
+    --accent-color: 178 100% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 174 24% 91%; /* #E3EBEA */
+    --input: 174 24% 91%;
+    --ring: 178 100% 35%;
+
+    --radius: 0.75rem;
+
+    /* ---- Motion & Shadows ------------------------------------------------ */
+    --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-fast:    180ms;
+    --dur-med:     260ms;
+    --dur-base:    400ms;
+    --dur-slow:    600ms;
+    --dur-slower:  900ms;
+  }
+
+  /* ---- Dark Mode --------------------------------------------------------- */
+  [data-theme="dark"] {
+    --paper:        #141B22;
+    --paper-2:      #1C252F;
+    --hairline:     #2C3A47;
+
+    --ink:          #E8EFF5;
+    --ink-2:        #9BAAB8;
+    --ink-3:        #64788A;
+    --ink-4:        #445566;
+    --ink-5:        #2C3A47;
+
+    --teal:             #00C8C2;
+    --teal-hover:       #00ABA5;
+    --teal-press:       #008F8A;
+    --teal-panel:       #0D2E2C;
+    --teal-panel-light: #102624;
+    --teal-soft:        #0D2A28;
+    --teal-stripe:      #00A8A2;
+    --teal-tint:        #0A1F1E;
+
+    --green:            var(--teal);
+    --green-hover:      var(--teal-hover);
+    --green-press:      var(--teal-press);
+    --mint-panel:       var(--teal-panel);
+    --mint-panel-light: var(--teal-panel-light);
+    --mint-soft:        var(--teal-soft);
+    --mint-stripe:      var(--teal-stripe);
+
+    --surface:        #1C252F;
+    --surface-raised: #232D38;
+    --bg:             var(--paper);
+    --fg-1:           var(--ink);
+    --fg-2:           var(--ink-2);
+    --fg-3:           var(--ink-3);
+    --border:         var(--hairline);
+
+    --background: 214 30% 11%;
+    --foreground: 210 30% 92%;
+    --card: 213 28% 14%;
+    --card-foreground: 210 30% 92%;
+    --popover: 213 28% 14%;
+    --popover-foreground: 210 30% 92%;
+    --muted: 213 22% 20%;
+    --muted-foreground: 210 12% 55%;
+    --border: 213 22% 22%;
+    --input: 213 22% 22%;
+    --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+/* Dopamine Coach UI Kit — shared styles */
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--paper);
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  transition: background 280ms ease, color 280ms ease;
+}
+/* Smooth dark mode transitions on common elements */
+.app, .sidebar, .main, .coach-card, .coach-aside-card,
+.up-card, .finished-card, .date-chip, .weektl-chip,
+.input, .textarea, .up-modal, .focus-card, .rest-card {
+  transition: background 280ms ease, border-color 280ms ease, color 280ms ease;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+
+/* Utility */
+.flex-col { display: flex; flex-direction: column; }
+.gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; } .gap-6 { gap: 24px; } .gap-8 { gap: 32px; }
+.mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; } .mt-8 { margin-top: 32px; } .mt-10 { margin-top: 40px; }
+
+/* ---- Dark mode: force input/textarea text to white ------------------- */
+/* shadcn components use Tailwind's text-base which bypasses our --ink var */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea {
+  color: #FFFFFF !important;
+  background-color: var(--surface) !important;
+  caret-color: var(--green);
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--ink-3) !important;
+}

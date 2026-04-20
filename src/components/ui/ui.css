@@ -1,0 +1,76 @@
+/* ---- Buttons --------------------------------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm); font-weight: 600;
+  padding: 13px 28px;
+  border-radius: 10px;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.btn-primary { background: var(--green); color: #FFFFFF; }
+.btn-primary:hover { background: var(--green-hover); }
+.btn-primary:active { background: var(--green-press); }
+.btn-primary.btn-go {
+  padding: 16px 80px;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  color: var(--ink);
+  font-weight: 600;
+}
+.btn-secondary:hover { background: var(--paper-2); }
+.btn-text { color: var(--ink-2); padding: 10px 14px; font-weight: 600; }
+.btn-text:hover { color: var(--ink); }
+.btn-lg { padding: 16px 40px; font-size: var(--text-base); }
+
+.btn-add {
+  background: var(--green);
+  color: #FFFFFF;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-add svg { width: 14px; height: 14px; }
+
+/* ---- Inputs ---------------------------------------------------------- */
+.field { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.field-label { font-size: var(--text-sm); font-weight: 600; color: var(--ink); }
+.input, .textarea {
+  width: 100%;
+  font-family: var(--font-body); font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--hairline);
+  border-radius: 10px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-out),
+              box-shadow var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+.input::placeholder, .textarea::placeholder { color: var(--ink-3); }
+.input:focus, .textarea:focus {
+  border-color: var(--green);
+  box-shadow: var(--shadow-focus);
+}
+.textarea { resize: none; line-height: 1.55; min-height: 160px; }
+
+/* Dark mode input overrides */
+[data-theme="dark"] .input,
+[data-theme="dark"] .textarea {
+  color: var(--ink);          /* #E8EFF5 — light text */
+  background: var(--surface); /* #1C252F — dark surface */
+  border-color: var(--hairline); /* #2C3A47 — subtle border */
+}
+[data-theme="dark"] .input::placeholder,
+[data-theme="dark"] .textarea::placeholder {
+  color: var(--ink-3); /* #64788A */
+}
