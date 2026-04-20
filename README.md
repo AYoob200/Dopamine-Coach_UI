@@ -170,3 +170,4 @@ CSS custom properties are defined in `src/index.css` under `:root`:
 ## 📝 License
 
 Private — all rights reserved.
+# Dopamine-Coach_UI
