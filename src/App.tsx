@@ -12,7 +12,7 @@ import {
 import { OngoingTab } from './components/tabs/OngoingTab';
 import { UpcomingTab } from './components/tabs/UpcomingTab';
 import { FinishedTab } from './components/tabs/FinishedTab';
-import { Task, Step } from './types/models';
+import { Task, Step, BackendRoadmapResponse } from './types/models';
 
 type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery';
 
@@ -29,17 +29,79 @@ export default function App() {
     tab === 'coach' &&
     (phase === 'focus' || phase === 'rest' || phase === 'gateway' || phase === 'survey' || phase === 'recovery');
 
-  const handleGo = ({ title, body }: { title: string; body: string }) => {
-    // Mock default steps from the backend for the roadmap
-    const defaultSteps: Partial<Step>[] = [
-      { title: 'Clarify the outcome in one sentence' },
-      { title: 'Sketch the shape of the first draft' },
-      { title: 'Write the opening section' },
-      { title: 'Review and refine' },
-      { title: 'Share for feedback' },
-    ];
-    setTask({ title, description: body, steps: defaultSteps as Step[] });
-    setPhase('roadmap');
+  const handleGo = async ({ title, body }: { title: string; body: string }) => {
+    try {
+      // Try to fetch real API first, fallback to mock data in development
+      let backendData: BackendRoadmapResponse;
+
+      const useMockMode = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_DATA !== 'false';
+
+      if (useMockMode) {
+        // Load mock data from public folder
+        const mockResponse = await fetch('/mock-roadmap.json');
+        if (!mockResponse.ok) throw new Error('Mock data not found');
+        backendData = await mockResponse.json();
+      } else {
+        // Call backend API to generate roadmap
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description: body })
+        });
+
+        if (!response.ok) {
+          // Fallback to mock data if API fails in development
+          if (import.meta.env.DEV) {
+            console.warn('API failed, using mock data');
+            const mockResponse = await fetch('/mock-roadmap.json');
+            if (!mockResponse.ok) throw new Error('API failed and mock data unavailable');
+            backendData = await mockResponse.json();
+          } else {
+            throw new Error('Failed to generate roadmap');
+          }
+        } else {
+          backendData = await response.json();
+        }
+      }
+
+      // Convert snake_case from backend to camelCase for frontend
+      const steps: Partial<Step>[] = backendData.tasks.map((task, index) => ({
+        id: task.task_id,
+        title: task.step_title,
+        stepTitle: task.step_title,
+        decomposition: task.decomposition,
+        estimatedTime: task.estimated_time,
+        isLaunchTask: task.is_launch_task,
+        primaryVerb: task.primary_verb,
+        deliverable: task.deliverable,
+        noveltyHook: task.novelty_hook,
+        passionAnchor: task.passion_anchor,
+        urgencyCue: task.urgency_cue,
+        incupTags: task.incup_tags,
+        isCompleted: false,
+        orderIndex: index
+      }));
+
+      // Build sessionMetadata from snake_case
+      const sessionMetadata = {
+        intentPriority: backendData.session_metadata.intent_priority,
+        identifiedTier: backendData.session_metadata.identified_tier,
+        estimatedTotalSessionTime: backendData.session_metadata.estimated_total_session_time,
+        totalTasks: backendData.session_metadata.total_tasks
+      };
+
+      // Set task with steps and metadata
+      setTask({ 
+        title, 
+        description: body, 
+        steps: steps as Step[],
+        sessionMetadata
+      });
+      setPhase('roadmap');
+    } catch (error) {
+      console.error('Error generating roadmap:', error);
+      // Fallback to empty state or show error UI
+    }
   };
 
   const handleStart = (r: Partial<Step>[]) => {
@@ -82,6 +144,7 @@ export default function App() {
       {tab === 'coach' && phase === 'focus' && steps.length > 0 && (
         <FocusScreen
           stepTitle={steps[stepIdx]?.title || 'Focus'}
+          step={steps[stepIdx]}
           onComplete={completeStep}
           onEnd={endSession}
           onRestart={() => setPhase('focus')}

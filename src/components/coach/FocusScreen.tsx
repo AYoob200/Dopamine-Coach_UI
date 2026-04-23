@@ -1,15 +1,18 @@
 import './FocusScreen.css';
 import React from 'react';
 import { Hourglass } from '../shared/Icons';
+import { Step } from '../../types/models';
 
 export function FocusScreen({
   stepTitle,
+  step,
   onComplete,
   onEnd,
   onRestart,
   onAddTime
 }: {
   stepTitle: string;
+  step?: Partial<Step>;
   onComplete: () => void;
   onEnd: () => void;
   onRestart: () => void;
@@ -19,6 +22,39 @@ export function FocusScreen({
     <div className="focus-stage focus-stage-bare">
       <div className="focus-center">
         <h2 className="focus-step-title">{stepTitle}</h2>
+        {step?.primaryVerb && (
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+            <strong>{step.primaryVerb}</strong> {step.deliverable ? `→ ${step.deliverable}` : ''}
+          </p>
+        )}
+        {step?.decomposition && (
+          <p style={{ fontSize: '13px', color: '#888', marginTop: '12px', maxWidth: '300px', lineHeight: '1.5' }}>
+            {step.decomposition}
+          </p>
+        )}
+        {step?.passionAnchor && (
+          <p style={{ fontSize: '12px', color: '#999', marginTop: '12px', fontStyle: 'italic', maxWidth: '300px' }}>
+            "{step.passionAnchor}"
+          </p>
+        )}
+        {step?.incupTags && step.incupTags.length > 0 && (
+          <div style={{ display: 'flex', gap: '6px', marginTop: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {step.incupTags.map((tag, i) => (
+              <span 
+                key={i} 
+                style={{ 
+                  fontSize: '11px', 
+                  backgroundColor: '#e5e7eb',
+                  color: '#374151',
+                  padding: '4px 8px',
+                  borderRadius: '4px'
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <Hourglass />
       </div>
       <div className="focus-pad" role="toolbar" aria-label="Focus controls">
