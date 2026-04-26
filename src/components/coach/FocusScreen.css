@@ -18,6 +18,15 @@
   align-items: center; justify-content: center;
   gap: 36px;
 }
+
+.focus-transitioning .focus-center {
+  animation: fadeOut 300ms ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.95); }
+}
 .focus-stage-bare .focus-step-title {
   font-family: var(--font-display);
   font-size: 28px; font-weight: 600;
@@ -29,10 +38,11 @@
 /* 2x2 icon pad — bottom-left of viewport */
 .focus-pad {
   position: fixed;
-  left: 32px; bottom: 32px;
-  display: grid;
-  grid-template-columns: repeat(2, 64px);
-  grid-template-rows: repeat(2, 64px);
+  left: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   z-index: 11;
 }
@@ -61,6 +71,42 @@
 .focus-sq-add:hover { background: #FFE9B5; }
 [data-theme="dark"] .focus-sq-add:hover { background: #332B14; }
 
+/* Hyperfocus — violet/purple (instant bypass) */
+.focus-sq-hyperfocus {
+  background: linear-gradient(135deg, #7C3AED 0%, #A855F7 100%);
+  color: #fff;
+  border-color: #A78BFA;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+[data-theme="dark"] .focus-sq-hyperfocus { background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%); border-color: #8B5CF6; box-shadow: 0 0 24px rgba(124, 58, 237, 0.5); }
+.focus-sq-hyperfocus:hover {
+  background: linear-gradient(135deg, #8B5CF6 0%, #A855F7 100%);
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.6), 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+.focus-sq-hyperfocus:active { transform: scale(0.96); }
+.focus-sq-hyperfocus.hyperfocus-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.hyperfocus-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hyperfocus-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
 /* Restart — neutral slate (reset) */
 .focus-sq-restart {
   background: var(--paper-2);
@@ -87,6 +133,21 @@
 }
 .focus-sq-complete:hover { background: var(--green-hover); border-color: var(--green-hover); }
 
+/* HyperFocus button */
+.focus-sq-hyper {
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid #FF6B2B;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 6px rgba(255, 107, 43, 0.3);
+}
+.focus-sq-hyper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 107, 43, 0.4);
+}
+.focus-sq-hyper:active { transform: translateY(0); }
 .focus-card {
   background: transparent;
   border-radius: 20px;
@@ -121,3 +182,34 @@
 .focus-btn:hover { background: var(--paper-2); color: var(--ink); }
 .focus-btn.primary { background: var(--green); color: #FFFFFF; grid-column: span 2; }
 .focus-btn.primary:hover { background: var(--green-hover); }
+
+/* Mini Toast */
+.mini-toast {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.92);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+  animation: toastSlideUp 1s ease-out forwards;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.mini-toast-icon {
+  font-size: 16px;
+}
+
+@keyframes toastSlideUp {
+  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}

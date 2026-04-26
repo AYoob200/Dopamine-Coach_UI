@@ -14,7 +14,7 @@ import { UpcomingTab } from './components/tabs/UpcomingTab';
 import { FinishedTab } from './components/tabs/FinishedTab';
 import { Task, Step, BackendRoadmapResponse } from './types/models';
 
-type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery';
+type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery' | 'finished';
 
 export default function App() {
   const [tab, setTab] = useState('coach');
@@ -24,6 +24,8 @@ export default function App() {
   const [steps, setSteps] = useState<Partial<Step>[]>([]);
   const [stepIdx, setStepIdx] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+
+  const [skipInterruption, setSkipInterruption] = useState(false);
 
   const focusMode =
     tab === 'coach' &&
@@ -91,9 +93,9 @@ export default function App() {
       };
 
       // Set task with steps and metadata
-      setTask({ 
-        title, 
-        description: body, 
+      setTask({
+        title,
+        description: body,
         steps: steps as Step[],
         sessionMetadata
       });
@@ -110,17 +112,34 @@ export default function App() {
     setPhase('focus');
   };
 
-  // Step complete → survey gateway first
-  const completeStep = () => setPhase('gateway');
+  // Step complete → skip gateway if hyperfocus was used, otherwise go to survey
+  const completeStep = () => {
+    if (skipInterruption) {
+      setSkipInterruption(false);
+      if (stepIdx + 1 >= steps.length) {
+        setPhase('entry');
+        setTask(null);
+        setStepIdx(0);
+      } else {
+        setStepIdx(prev => prev + 1);
+        setPhase('focus');
+      }
+    } else {
+      setPhase('gateway');
+    }
+  };
   const restDone = () => setPhase('recovery');
+
   const startSurvey = () => {
     setAnswers([]);
     setPhase('survey');
   };
+
   const surveyDone = (a: number[]) => {
     setAnswers(a);
     setPhase('rest');
   };
+
   const afterRecovery = () => {
     if (stepIdx + 1 >= steps.length) {
       setPhase('entry');
@@ -132,10 +151,17 @@ export default function App() {
     }
   };
   const endSession = () => {
+
     setPhase('entry');
     setTask(null);
     setStepIdx(0);
   };
+
+  const handleHyperFocus = () => {
+  setSkipInterruption(true);
+  };
+
+
 
   return (
     <Shell tab={tab} onTab={setTab} focusMode={focusMode} darkMode={darkMode} onToggleDark={() => setDarkMode(d => !d)}>
@@ -145,6 +171,9 @@ export default function App() {
         <FocusScreen
           stepTitle={steps[stepIdx]?.title || 'Focus'}
           step={steps[stepIdx]}
+          onHyperFocus={handleHyperFocus}
+          isHyperFocusActive={skipInterruption}
+          onHyperFocusDeactivate={() => setSkipInterruption(false)}
           onComplete={completeStep}
           onEnd={endSession}
           onRestart={() => setPhase('focus')}
