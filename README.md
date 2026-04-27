@@ -326,6 +326,88 @@ CSS custom properties are defined in `src/index.css` under `:root`:
 
 ---
 
+## ⏳ Hourglass Timer (Custom Implementation)
+
+The focus timer uses a fully custom-built, animated SVG hourglass component located in `src/components/shared/Icons.tsx`.
+
+### Architecture
+
+The `Hourglass` component is built as a `forwardRef` component exposing an **imperative handle** (`HourglassHandle`) so that parent components can control it directly without prop-drilling:
+
+```ts
+export interface HourglassHandle {
+  addTime: () => void;    // Adds 25% of base duration to remaining time
+  restart: () => void;    // Resets timer to original duration
+  drain: () => void;      // Instantly empties sand, then calls onTimeUp after 600ms
+}
+```
+
+### Props
+
+```ts
+interface HourglassProps {
+  duration: number;       // Total duration in seconds (AI-estimated per step)
+  onTimeUp?: () => void;  // Callback fired when time runs out naturally or via drain()
+}
+```
+
+### How It Works
+
+- **Real timer**: Uses `setInterval` (1-second tick) to track elapsed time.
+- **SVG sand animation**: Sand positions are calculated from `elapsed / totalTime` ratio and applied as React state — no hardcoded CSS `<animate>` elements.
+- **Color transition**: Sand color shifts from Teal (`#1f6e66`) → Red (`#8e2e26`) once progress passes **75%**.
+- **Falling stream**: A dashed SVG line appears between top and bottom chambers during active drain.
+- **Step reset**: The component is given a `key={step?.id}` in `FocusScreen.tsx`, so React unmounts and remounts it fresh on each new step — no `useEffect` needed for resets.
+
+### Button Wiring (in `FocusScreen.tsx`)
+
+| Button | Action |
+|--------|--------|
+| ➕ Add Time | `hourglassRef.current?.addTime()` — extends by 25% of base |
+| 🔄 Restart | `hourglassRef.current?.restart()` — resets to full duration |
+| ✅ Complete | `hourglassRef.current?.drain()` — instant drain → calls `onComplete` after 600ms |
+
+---
+
+## 🔥 HyperFocus Mode
+
+HyperFocus allows users to skip the Survey and Rest screens between steps when they feel "in the zone."
+
+### Activation
+
+Pressing the fire button (bottom toolbar) when HyperFocus is **inactive**:
+- Calls `onHyperFocus()` → sets `skipInterruption = true` in `App.tsx`
+- Shows a toast: *"Hyper Focus mode has been activated 🔥"*
+
+### Deactivation with Intentional Friction
+
+To prevent impulsive decisions, deactivating HyperFocus requires a **3-second hold**:
+
+1. Pressing the fire button when HyperFocus is **active** → opens a centered overlay
+2. The overlay shows a progress bar and a **"Hold to disable"** button
+3. User must hold for 3 seconds (30 × 100ms ticks) for deactivation to complete
+4. Releasing before 3 seconds → overlay closes, HyperFocus stays **ON**
+5. On success → calls `onHyperFocusDeactivate()` → sets `skipInterruption = false` + toast: *"Focus mode disabled"*
+
+### Props Added to `FocusScreen`
+
+```ts
+isHyperFocusActive: boolean;          // Passed as skipInterruption from App.tsx
+onHyperFocusDeactivate: () => void;   // () => setSkipInterruption(false)
+```
+
+### CSS Classes (in `FocusScreen.css`)
+
+| Class | Purpose |
+|-------|---------|
+| `.hf-overlay` | Full-screen dimmed backdrop with `backdrop-filter: blur(4px)` |
+| `.hf-overlay-card` | Centered white card with emoji, title, description |
+| `.hf-hold-bar-wrap / fill` | Orange progress bar that fills over 3 seconds |
+| `.hf-hold-btn` | Orange "Hold to disable" button |
+| `.hf-cancel-btn` | Ghost "Keep focusing" dismiss button |
+
+---
+
 ## 📝 License
 
 Private — all rights reserved.
