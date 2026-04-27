@@ -1,8 +1,16 @@
 import './FinishedTab.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IconChev, IconCheck } from '../shared/Icons';
 
-function FinishedCard({ n, title, finishedOn, steps, defaultOpen = false }: any) {
+interface FinishedCard {
+  n: number;
+  title: string;
+  finishedOn: string;
+  steps: Array<{ title: string; ts: string }>;
+  defaultOpen?: boolean;
+}
+
+function FinishedCardComponent({ n, title, finishedOn, steps, defaultOpen = false }: FinishedCard) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={`finished-card ${open ? 'open' : ''}`}>
@@ -24,7 +32,7 @@ function FinishedCard({ n, title, finishedOn, steps, defaultOpen = false }: any)
         <div className="finished-log">
           <div className="finished-log-label">Completed sub-steps</div>
           <ul className="finished-steps">
-            {steps.map((s: any, i: number) => (
+            {steps.map((s, i: number) => (
               <li key={i} className="finished-step">
                 <div className="finished-step-check" aria-hidden="true">
                   <IconCheck size={11} />
@@ -41,38 +49,20 @@ function FinishedCard({ n, title, finishedOn, steps, defaultOpen = false }: any)
 }
 
 export function FinishedTab() {
-  // TODO (Backend): GET /api/tasks?status=finished
-  const cards = [
-    {
-      n: 1,
-      title: '9:00 AM — Team Meeting',
-      finishedOn: 'Dec 27 at 10:26 AM',
-      steps: [
-        { title: 'Review agenda & open notes', ts: 'Dec 27, 2024 · 9:02 AM' },
-        { title: 'Share onboarding progress', ts: 'Dec 27, 2024 · 9:18 AM' },
-        { title: 'Biometric-survey walkthrough', ts: 'Dec 27, 2024 · 9:41 AM' },
-        { title: 'Assign follow-ups', ts: 'Dec 27, 2024 · 10:14 AM' },
-        { title: 'Write-up & file meeting notes', ts: 'Dec 27, 2024 · 10:26 AM' },
-      ],
-      defaultOpen: true,
-    },
-    {
-      n: 2,
-      title: 'Morning Exercise — low-intensity',
-      finishedOn: 'Dec 27 at 8:32 AM',
-      steps: [
-        { title: 'Dress, water, light stretch', ts: 'Dec 27, 2024 · 8:00 AM' },
-        { title: '20-minute easy-pace walk', ts: 'Dec 27, 2024 · 8:22 AM' },
-        { title: 'Log energy score (4/5)', ts: 'Dec 27, 2024 · 8:32 AM' },
-      ],
-    },
-  ];
+  const [cards, setCards] = useState<FinishedCard[]>([]);
+
+  useEffect(() => {
+    fetch('/finished.json')
+      .then(res => res.json())
+      .then(data => setCards(data.cards))
+      .catch(err => console.error('Failed to load finished tasks:', err));
+  }, []);
 
   return (
     <>
       <h1 className="page-title"><b>Finished</b> <span className="title-light">Completed tasks log</span></h1>
       <div className="finished-list">
-        {cards.map((c, i) => <FinishedCard key={i} {...c} />)}
+        {cards.map((c, i) => <FinishedCardComponent key={i} {...c} />)}
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 import './UpcomingTab.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeekTimeline, TaskPopup } from './SharedTabs';
 import { IconChev, IconPlus } from '../shared/Icons';
 import { Task } from '../../types/models';
@@ -43,16 +43,17 @@ function UpcomingCard({ task, onEdit, onLaunch }: { task: Partial<Task>; onEdit:
 }
 
 export function UpcomingTab({ onLaunchTask }: { onLaunchTask: (task: Partial<Task>) => void }) {
-  // TODO (Backend): GET /api/tasks?status=upcoming
-  const seed: Partial<Task>[] = [
-    { id: '1', isoDate: '2024-12-27', timeLabel: '9:00 AM', dateLabel: 'Fri, Dec 27', title: 'Team Meeting', description: 'Weekly sync with the design group.' },
-    { id: '2', isoDate: '2024-12-27', timeLabel: '11:30 AM', dateLabel: 'Fri, Dec 27', title: 'Design review — Mira', description: 'Walk Mira through the onboarding variants.' },
-  ];
-
-  const [tasks, setTasks] = useState(seed);
+  const [tasks, setTasks] = useState<Partial<Task>[]>([]);
   const [activeIso, setActiveIso] = useState('2024-12-27');
   const [weekOffset, setWeekOffset] = useState(0);
   const [popup, setPopup] = useState<{ mode: 'create' | 'edit'; initial?: Partial<Task> } | null>(null);
+
+  useEffect(() => {
+    fetch('/upcoming.json')
+      .then(res => res.json())
+      .then(data => setTasks(data.tasks))
+      .catch(err => console.error('Failed to load upcoming tasks:', err));
+  }, []);
 
   const visible = tasks.filter(t => t.isoDate === activeIso);
 

@@ -12,6 +12,7 @@ import {
 import { OngoingTab } from './components/tabs/OngoingTab';
 import { UpcomingTab } from './components/tabs/UpcomingTab';
 import { FinishedTab } from './components/tabs/FinishedTab';
+import { LoginScreen } from './components/auth/LoginScreen';
 import { Task, Step, BackendRoadmapResponse } from './types/models';
 
 type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery' | 'finished';
@@ -19,6 +20,7 @@ type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 're
 export default function App() {
   const [tab, setTab] = useState('coach');
   const [darkMode, setDarkMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [phase, setPhase] = useState<Phase>('entry');
   const [task, setTask] = useState<Partial<Task> | null>(null);
   const [steps, setSteps] = useState<Partial<Step>[]>([]);
@@ -73,7 +75,6 @@ export default function App() {
         stepTitle: task.step_title,
         decomposition: task.decomposition,
         estimatedTime: task.estimated_time,
-        isLaunchTask: task.is_launch_task,
         primaryVerb: task.primary_verb,
         deliverable: task.deliverable,
         noveltyHook: task.novelty_hook,
@@ -87,7 +88,6 @@ export default function App() {
       // Build sessionMetadata from snake_case
       const sessionMetadata = {
         intentPriority: backendData.session_metadata.intent_priority,
-        identifiedTier: backendData.session_metadata.identified_tier,
         estimatedTotalSessionTime: backendData.session_metadata.estimated_total_session_time,
         totalTasks: backendData.session_metadata.total_tasks
       };
@@ -151,17 +151,18 @@ export default function App() {
     }
   };
   const endSession = () => {
-
     setPhase('entry');
     setTask(null);
     setStepIdx(0);
   };
 
   const handleHyperFocus = () => {
-  setSkipInterruption(true);
+    setSkipInterruption(true);
   };
 
-
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  }
 
   return (
     <Shell tab={tab} onTab={setTab} focusMode={focusMode} darkMode={darkMode} onToggleDark={() => setDarkMode(d => !d)}>

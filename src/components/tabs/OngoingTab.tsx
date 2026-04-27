@@ -1,5 +1,5 @@
 import './OngoingTab.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WeekTimeline } from './SharedTabs';
 import { IconChev, IconCheck } from '../shared/Icons';
 import { Task, Step } from '../../types/models';
@@ -77,31 +77,16 @@ function OngoingCard({ task, onStart }: { task: Partial<Task>; onStart: (task: P
 }
 
 export function OngoingTab({ onStartWork }: { onStartWork: (task: Partial<Task>, startIdx: number) => void }) {
-  // TODO (Backend): GET /api/tasks?status=ongoing
-  // Using Mock Data representing the .NET Backend Models
-  const seed: Partial<Task>[] = [
-    {
-      id: '1', isoDate: '2024-12-26', timeLabel: '8:00 AM', title: 'Morning Exercise',
-      steps: [
-        { id: 's1', taskId: '1', title: 'Dress & drink water', isCompleted: true, completedAt: '2024-12-26T08:01:00Z', orderIndex: 0 },
-        { id: 's2', taskId: '1', title: 'Easy-pace 20-min walk', isCompleted: true, completedAt: '2024-12-26T08:22:00Z', orderIndex: 1 },
-        { id: 's3', taskId: '1', title: 'Light stretch + breath', isCompleted: false, orderIndex: 2 },
-        { id: 's4', taskId: '1', title: 'Log energy (1–5)', isCompleted: false, orderIndex: 3 },
-      ],
-      defaultOpen: true,
-    },
-    {
-      id: '2', isoDate: '2024-12-26', timeLabel: '10:00 AM', title: 'Deep work — onboarding draft',
-      steps: [
-        { id: 's5', taskId: '2', title: 'Clarify outcome in one sentence', isCompleted: true, completedAt: '2024-12-26T10:04:00Z', orderIndex: 0 },
-        { id: 's6', taskId: '2', title: 'Sketch draft shape', isCompleted: false, orderIndex: 1 },
-        { id: 's7', taskId: '2', title: 'Write opening section', isCompleted: false, orderIndex: 2 },
-      ],
-    },
-  ];
-
+  const [seed, setSeed] = useState<Partial<Task>[]>([]);
   const [activeIso, setActiveIso] = useState('2024-12-26');
   const [weekOffset, setWeekOffset] = useState(0);
+
+  useEffect(() => {
+    fetch('/ongoing.json')
+      .then(res => res.json())
+      .then(data => setSeed(data.tasks))
+      .catch(err => console.error('Failed to load ongoing tasks:', err));
+  }, []);
 
   const visible = seed.filter(t => t.isoDate === activeIso);
   const niceDay = new Date(activeIso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
