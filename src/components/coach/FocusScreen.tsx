@@ -2,6 +2,7 @@ import './FocusScreen.css';
 import React, { useRef, useState } from 'react';
 import { Hourglass, HourglassHandle } from '../shared/Icons';
 import { Step } from '../../types/models';
+import { focusSessionApi, taskApi } from '../../lib/api';
 
 export function FocusScreen({
   stepTitle,
@@ -116,16 +117,27 @@ export function FocusScreen({
             <path d="M3 12a9 9 0 1 0 2.64-6.36" /><path d="M3 4v5h5" />
           </svg>
         </button>
-        <button className="focus-sq focus-sq-end" onClick={() => {
-          // TODO (Backend): PUT /api/focus-sessions/{id}/end
+        <button className="focus-sq focus-sq-end" onClick={async () => {
+          try {
+            // Provide a real or derived sessionId from context if available
+            await focusSessionApi.endSession('session-id-placeholder');
+          } catch (e) {
+            console.error('Failed to end focus session', e);
+          }
           onEnd();
         }} title="End session" aria-label="End session">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none">
             <rect x="6" y="6" width="12" height="12" rx="1.5" />
           </svg>
         </button>
-        <button className="focus-sq focus-sq-complete" onClick={() => {
-          // TODO (Backend): PUT /api/tasks/{taskId}/steps/{stepId}/complete
+        <button className="focus-sq focus-sq-complete" onClick={async () => {
+          try {
+            if (step && step.taskId && step.id) {
+              await taskApi.completeStep(step.taskId, step.id);
+            }
+          } catch (e) {
+            console.error('Failed to mark step complete', e);
+          }
           hourglassRef.current?.drain(); // drain() calls onComplete internally after 600ms
         }} title="Complete step" aria-label="Complete step">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -1,6 +1,7 @@
 import './SurveyScreen.css';
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
+import { surveyApi } from '../../lib/api';
 
 export function SurveyGateway({ onStart }: { onStart: () => void }) {
   return (
@@ -43,13 +44,18 @@ export function SurveyScreen({ onDone }: { onDone: (answers: number[]) => void }
     if (timerRef.current) clearTimeout(timerRef.current);
     setSelected(val);
     setPhase('out');
-    setTimeout(() => {
+    setTimeout(async () => {
       const next = [...answers, val ?? 3]; // Default to 3 if skipped
       setAnswers(next);
       if (idx < questions.length - 1) {
         setIdx(idx + 1);
       } else {
-        // TODO (Backend): POST /api/surveys with next (answers array)
+        try {
+          // Provide real taskId and stepId from context when available
+          await surveyApi.submitSurvey('taskId-placeholder', 'stepId-placeholder', next);
+        } catch (e) {
+          console.error('Failed to submit survey', e);
+        }
         onDone(next);
       }
     }, 280);

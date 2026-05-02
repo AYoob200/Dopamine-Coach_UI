@@ -43,9 +43,10 @@ export function CoachScreen({ onGo }: { onGo: (data: { title: string; body: stri
             <button
               className="btn-go-pill"
               disabled={!canGo}
-              onClick={() => {
+              onClick={async () => {
                 if (canGo) {
-                  // TODO (Backend): POST /api/tasks to create a new task object
+                  // NOTE: Creation of the task is handled internally by the handleGo callback in App.tsx
+                  // which already calls POST /api/tasks.
                   onGo({ title, body });
                 }
               }}

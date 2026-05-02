@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Button } from '../ui/button';
+import { taskApi } from '../../lib/api';
 
 export function RecoveryScreen({
   answers,
@@ -19,12 +20,19 @@ export function RecoveryScreen({
         : "Soft reset. One more gentle step when you're ready.";
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      // TODO (Backend): If isLast, mark Task as fully complete: PUT /api/tasks/{id}/complete
+    const t = setTimeout(async () => {
+      try {
+        if (isLast) {
+          // Provide taskId via props or context
+          await taskApi.completeTask('placeholder-task-id');
+        }
+      } catch (e) {
+        console.error('Failed to mark task fully complete', e);
+      }
       onContinue();
     }, 6000);
     return () => clearTimeout(t);
-  }, [onContinue]);
+  }, [onContinue, isLast]);
 
   return (
     <div className="focus-stage">

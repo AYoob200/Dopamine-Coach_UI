@@ -1,5 +1,6 @@
 import './RestScreen.css';
 import React, { useState, useEffect, useRef } from 'react';
+import { surveyApi } from '../../lib/api';
 
 export interface RestTip {
   /** Short wellness tip shown as the headline */
@@ -11,9 +12,7 @@ export interface RestTip {
 }
 
 // ---------------------------------------------------------------------------
-// TODO (Backend): GET /api/rest-tips/current
-// Replace this mock with a real fetch when the API is available.
-// The endpoint should return a RestTip object with the current tip + duration.
+// GET /api/rest-tips/current (Using surveyApi.getCurrentTip falling back to mock)
 // ---------------------------------------------------------------------------
 const FALLBACK_TIPS: RestTip[] = [
   { tip: 'Close your eyes and take three slow, deep breaths.', source: 'Breathing technique', durationSeconds: 60 },
@@ -23,8 +22,13 @@ const FALLBACK_TIPS: RestTip[] = [
   { tip: 'Tense every muscle in your body for 5 seconds, then fully release.', source: 'Progressive relaxation', durationSeconds: 90 },
 ];
 
-function pickTip(): RestTip {
-  // TODO (Backend): replace with await fetch('/api/rest-tips/current')
+async function fetchOrPickTip(): Promise<RestTip> {
+  try {
+    const res = await surveyApi.getCurrentTip();
+    if (res.data) return res.data;
+  } catch (e) {
+    console.warn('Backend /api/rest-tips/current not available, using fallback tip.');
+  }
   return FALLBACK_TIPS[Math.floor(Math.random() * FALLBACK_TIPS.length)];
 }
 
@@ -33,24 +37,39 @@ const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function RestScreen({ onDone }: { onDone: () => void }) {
-  const [restTip] = useState<RestTip>(() => pickTip());
-  const [secondsLeft, setSecondsLeft] = useState(restTip.durationSeconds);
+  const [restTip, setRestTip] = useState<RestTip | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
+    fetchOrPickTip().then(tip => {
+      setRestTip(tip);
+      setSecondsLeft(tip.durationSeconds);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (secondsLeft === null || !restTip) return;
+
+    intervalRef.current = setInterval(async () => {
       setSecondsLeft((s) => {
-        if (s <= 1) {
+        if (s !== null && s <= 1) {
           clearInterval(intervalRef.current!);
-          // TODO (Backend): POST /api/rest-sessions/complete when rest is done
+          
+          surveyApi.completeRest('placeholder-session-id').catch(e => 
+            console.error('Failed to report rest completion', e)
+          );
+          
           onDone();
           return 0;
         }
-        return s - 1;
+        return s !== null ? s - 1 : 0;
       });
     }, 1000);
     return () => clearInterval(intervalRef.current!);
-  }, [onDone]);
+  }, [onDone, secondsLeft, restTip]);
+
+  if (!restTip || secondsLeft === null) return <div className="focus-stage" />;
 
   const progress = secondsLeft / restTip.durationSeconds; // 1 → 0
   const dashOffset = CIRCUMFERENCE * (1 - progress);

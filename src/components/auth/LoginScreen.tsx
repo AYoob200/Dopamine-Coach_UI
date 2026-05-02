@@ -21,6 +21,17 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
     setIsLoading(true);
     setErrorMsg('');
 
+    // --- FAKE LOGIN FOR UI TESTING ---
+    if (email === 'test@coach.com' && password === 'password') {
+      setTimeout(() => {
+        setIsLoading(false);
+        localStorage.setItem('auth_token', 'fake-test-token');
+        onLogin();
+      }, 500); // Simulate brief network delay
+      return;
+    }
+    // ---------------------------------
+
     try {
       // Call the backend login API
       const res = await authApi.login({ email, password });

@@ -4,6 +4,7 @@ import { Task } from '../../types/models';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
+import { taskApi } from '../../lib/api';
 
 export function WeekTimeline({
   anchor = new Date(),
@@ -126,8 +127,17 @@ export function TaskPopup({
         </div>
         <div className="up-modal-foot">
           <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button onClick={() => {
-            // TODO (Backend): POST or PUT /api/tasks based on mode
+          <Button onClick={async () => {
+            try {
+              if (mode === 'create') {
+                await taskApi.createTask(title.trim(), desc.trim());
+              } else {
+                // If it's an edit, you'd call a PUT task endpoint if available.
+                // await taskApi.updateTask(task.id, { title: title.trim(), description: desc.trim() });
+              }
+            } catch (e) {
+              console.error('Failed to save task in popup', e);
+            }
             onSave({ title: title.trim(), description: desc.trim() });
           }}>
             {mode === 'edit' ? 'Save changes' : 'Add task'}
