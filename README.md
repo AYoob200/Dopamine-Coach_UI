@@ -32,6 +32,7 @@
 | Styling       | Vanilla CSS (component-scoped) + Tailwind CSS v3 (utilities) |
 | UI primitives | Radix UI (`@radix-ui/react-dialog`, `@radix-ui/react-slot`)  |
 | Icons         | Lucide React                                                 |
+| Networking    | `axios` (centralized API client in `src/lib/api.ts`)         |
 | Backend       | .NET Core REST API (async roadmap generation)                |
 
 ---
@@ -44,10 +45,17 @@ src/
 ├── index.css                 # Global CSS variables, resets, Tailwind base
 ├── main.tsx                  # Entry point
 │
+├── lib/
+│   └── utils.ts              # Utility functions
+│
 ├── types/
-│   └── models.ts             # TypeScript interfaces (Task, Step, FocusSession, SurveyAnswer)
+│   ├── models.ts             # Core TypeScript interfaces
+│   └── backend.ts, etc.      # Additional type definitions
 │
 └── components/
+    ├── auth/                 # Authentication views
+    │   └── LoginScreen.tsx
+    │
     ├── layout/               # Shell, Sidebar — app chrome
     │   ├── Shell.tsx
     │   ├── Sidebar.tsx
@@ -72,6 +80,7 @@ src/
     │
     ├── ui/                   # Primitive UI components
     │   ├── button.tsx
+    │   ├── dialog.tsx
     │   ├── input.tsx
     │   ├── textarea.tsx
     │   └── ui.css
@@ -228,10 +237,16 @@ RoadmapScreen displays with priority tag + step details
 onStart() → FocusScreen on per-step basis
 ```
 
-### Other Endpoints
+### Other Endpoints (via Axios)
+
+All API calls are centralized in [src/lib/api.ts](src/lib/api.ts) using the `axios` library. It automatically handles base URLs and authorization tokens.
 
 | Method | Endpoint                                  | Purpose                                   |
 | ------ | ----------------------------------------- | ----------------------------------------- |
+| `POST` | `/api/auth/login`                         | User Email/Password login                 |
+| `POST` | `/api/auth/signup`                        | Register new user                         |
+| `POST` | `/api/oauth/google`                       | Google SSO authentication                 |
+| `POST` | `/api/users/setup`                        | User profile setup and preferences        |
 | `POST` | `/api/tasks`                              | Create a new task + generate roadmap      |
 | `GET`  | `/api/tasks?status=upcoming`              | List upcoming tasks                       |
 | `GET`  | `/api/tasks?status=ongoing`               | List ongoing tasks                        |

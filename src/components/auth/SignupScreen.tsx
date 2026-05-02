@@ -3,15 +3,16 @@ import { Eye, EyeOff } from 'lucide-react';
 import { authApi } from '../../lib/api';
 import './LoginScreen.css';
 
-type LoginScreenProps = {
-  onLogin: () => void;
-  onSignUp?: () => void;
-  onGoogleSignIn?: () => void;
+type SignupScreenProps = {
+  onSignUpSuccess: () => void;
+  onLoginClick: () => void;
+  onGoogleSignIn: () => void;
 };
 
-export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenProps) {
+export function SignupScreen({ onSignUpSuccess, onLoginClick, onGoogleSignIn }: SignupScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -22,18 +23,18 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
     setErrorMsg('');
 
     try {
-      // Call the backend login API
-      const res = await authApi.login({ email, password });
+      // Call the backend sign up API
+      const res = await authApi.signup({ email, password, fullName });
       
-      // Store returned token
+      // Store token if returned immediately
       if (res.data?.token) {
         localStorage.setItem('auth_token', res.data.token);
       }
       
-      onLogin();
+      onSignUpSuccess();
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.response?.data?.message || 'Invalid credentials. Please try again.');
+      setErrorMsg(err.response?.data?.message || 'Failed to sign up. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -54,17 +55,32 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
         </div>
         <br/>
         <br/>
-            <h1>Welcome back!</h1>
-            <p>Sign in to pick up where you left off.</p>
+            <h1>Create an Account</h1>
+            <p>Start your journey to better focus.</p>
           </header>
 
           {errorMsg && <div className="login-error-msg" style={{ color: 'red', marginBottom: '1rem', fontSize: '0.875rem' }}>{errorMsg}</div>}
 
           <div className="login-field">
-            <label htmlFor="login-email">Email Address</label>
+            <label htmlFor="signup-name">Full Name</label>
             <div className="login-field__control">
               <input
-                id="login-email"
+                id="signup-name"
+                type="text"
+                autoComplete="name"
+                placeholder="Jane Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="login-field">
+            <label htmlFor="signup-email">Email Address</label>
+            <div className="login-field__control">
+              <input
+                id="signup-email"
                 type="email"
                 autoComplete="email"
                 placeholder="you@example.com"
@@ -76,13 +92,13 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
           </div>
 
           <div className="login-field">
-            <label htmlFor="login-password">Password</label>
+            <label htmlFor="signup-password">Password</label>
             <div className="login-field__control login-field__control--password">
               <input
-                id="login-password"
+                id="signup-password"
                 type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                placeholder="Your password"
+                autoComplete="new-password"
+                placeholder="Create a password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -99,7 +115,7 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
           </div>
 
           <button type="submit" className="login-primary" disabled={isLoading}>
-            {isLoading ? <span className="login-spinner" /> : 'Login'}
+            {isLoading ? <span className="login-spinner" /> : 'Sign Up'}
           </button>
 
           <div className="login-divider">OR</div>
@@ -110,13 +126,13 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
             onClick={onGoogleSignIn}
           >
             <GoogleMark />
-            Sign in with Google
+            Sign up with Google
           </button>
 
           <div className="login-footer">
-            <span>Don't have an account?</span>
-            <button type="button" className="login-signup" onClick={onSignUp}>
-              Sign Up
+            <span>Already have an account?</span>
+            <button type="button" className="login-signup" onClick={onLoginClick}>
+              Login
             </button>
           </div>
         </form>
@@ -128,6 +144,7 @@ export function LoginScreen({ onLogin, onSignUp, onGoogleSignIn }: LoginScreenPr
         <span className="login-visual__blob login-visual__blob--c" />
 
         
+
         <p className="login-visual__quote">
           A calmer way to <span>focus</span>. One small step at a time.
         </p>

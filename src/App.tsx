@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Shell } from './components/layout/Shell';
 import {
   CoachScreen,
@@ -13,14 +14,25 @@ import { OngoingTab } from './components/tabs/OngoingTab';
 import { UpcomingTab } from './components/tabs/UpcomingTab';
 import { FinishedTab } from './components/tabs/FinishedTab';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { SignupScreen } from './components/auth/SignupScreen';
+import { SetupScreen } from './components/auth/SetupScreen';
 import { Task, Step, BackendRoadmapResponse } from './types/models';
 
 type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery' | 'finished';
 
 export default function App() {
-  const [tab, setTab] = useState('coach');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine active tab from URL path
+  const pathPart = location.pathname.split('/')[1] || 'coach';
+  const tab = ['coach', 'ongoing', 'upcoming', 'finished'].includes(pathPart) ? pathPart : 'coach';
+
   const [darkMode, setDarkMode] = useState(false);
+  
+  // Track auth status. In a real app, this would check tokens initially.
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const [phase, setPhase] = useState<Phase>('entry');
   const [task, setTask] = useState<Partial<Task> | null>(null);
   const [steps, setSteps] = useState<Partial<Step>[]>([]);
@@ -160,58 +172,99 @@ export default function App() {
     setSkipInterruption(true);
   };
 
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  // --- Auth Pages Routing ---
+  if (!isAuthenticated && ['/login', '/signup', '/setup'].includes(location.pathname)) {
+    return (
+      <Routes>
+        <Route path="/login" element={
+          <LoginScreen 
+            onLogin={() => { setIsAuthenticated(true); navigate('/coach'); }}
+            onSignUp={() => navigate('/signup')}
+            onGoogleSignIn={() => navigate('/setup')}
+          />
+        } />
+        <Route path="/signup" element={
+          <SignupScreen 
+            onSignUpSuccess={() => navigate('/setup')} 
+            onLoginClick={() => navigate('/login')} 
+            onGoogleSignIn={() => navigate('/setup')}
+          />
+        } />
+        <Route path="/setup" element={
+          <SetupScreen 
+            onSetupComplete={() => { setIsAuthenticated(true); navigate('/coach'); }}
+          />
+        } />
+      </Routes>
+    );
   }
 
-  return (
-    <Shell tab={tab} onTab={setTab} focusMode={focusMode} darkMode={darkMode} onToggleDark={() => setDarkMode(d => !d)}>
-      {tab === 'coach' && phase === 'entry' && <CoachScreen onGo={handleGo} />}
-      {tab === 'coach' && phase === 'roadmap' && <RoadmapScreen task={task || {}} onStart={handleStart} />}
-      {tab === 'coach' && phase === 'focus' && steps.length > 0 && (
-        <FocusScreen
-          stepTitle={steps[stepIdx]?.title || 'Focus'}
-          step={steps[stepIdx]}
-          onHyperFocus={handleHyperFocus}
-          isHyperFocusActive={skipInterruption}
-          onHyperFocusDeactivate={() => setSkipInterruption(false)}
-          onComplete={completeStep}
-          onEnd={endSession}
-          onRestart={() => setPhase('focus')}
-          onAddTime={() => {}}
-        />
-      )}
-      {tab === 'coach' && phase === 'gateway' && <SurveyGateway onStart={startSurvey} />}
-      {tab === 'coach' && phase === 'survey' && <SurveyScreen onDone={surveyDone} />}
-      {tab === 'coach' && phase === 'rest' && <RestScreen onDone={restDone} />}
-      {tab === 'coach' && phase === 'recovery' && (
-        <RecoveryScreen
-          answers={answers}
-          onContinue={afterRecovery}
-          isLast={stepIdx + 1 >= steps.length}
-        />
-      )}
+  // Enforce authentication
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-      {tab === 'ongoing' && (
-        <OngoingTab
-          onStartWork={(t, startIdx) => {
-            setTab('coach');
-            setTask({ title: t.title, description: t.description });
-            setSteps(t.steps || []);
-            setStepIdx(Math.max(0, startIdx));
-            setPhase('focus');
-          }}
-        />
-      )}
-      {tab === 'upcoming' && (
-        <UpcomingTab
-          onLaunchTask={(t) => {
-            setTab('coach');
-            handleGo({ title: t.title || '', body: t.description || '' });
-          }}
-        />
-      )}
-      {tab === 'finished' && <FinishedTab />}
+  // --- Main Authenticated App Routing ---
+  return (
+    <Shell tab={tab} onTab={() => {}} focusMode={focusMode} darkMode={darkMode} onToggleDark={() => setDarkMode(d => !d)}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/coach" replace />} />
+        
+        <Route path="/coach" element={
+          <>
+            {phase === 'entry' && <CoachScreen onGo={handleGo} />}
+            {phase === 'roadmap' && <RoadmapScreen task={task || {}} onStart={handleStart} />}
+            {phase === 'focus' && steps.length > 0 && (
+              <FocusScreen
+                stepTitle={steps[stepIdx]?.title || 'Focus'}
+                step={steps[stepIdx]}
+                onHyperFocus={handleHyperFocus}
+                isHyperFocusActive={skipInterruption}
+                onHyperFocusDeactivate={() => setSkipInterruption(false)}
+                onComplete={completeStep}
+                onEnd={endSession}
+                onRestart={() => setPhase('focus')}
+                onAddTime={() => {}}
+              />
+            )}
+            {phase === 'gateway' && <SurveyGateway onStart={startSurvey} />}
+            {phase === 'survey' && <SurveyScreen onDone={surveyDone} />}
+            {phase === 'rest' && <RestScreen onDone={restDone} />}
+            {phase === 'recovery' && (
+              <RecoveryScreen
+                answers={answers}
+                onContinue={afterRecovery}
+                isLast={stepIdx + 1 >= steps.length}
+              />
+            )}
+          </>
+        } />
+
+        <Route path="/ongoing" element={
+          <OngoingTab
+            onStartWork={(t, startIdx) => {
+              navigate('/coach');
+              setTask({ title: t.title, description: t.description });
+              setSteps(t.steps || []);
+              setStepIdx(Math.max(0, startIdx));
+              setPhase('focus');
+            }}
+          />
+        } />
+
+        <Route path="/upcoming" element={
+          <UpcomingTab
+            onLaunchTask={(t) => {
+              navigate('/coach');
+              handleGo({ title: t.title || '', body: t.description || '' });
+            }}
+          />
+        } />
+
+        <Route path="/finished" element={<FinishedTab />} />
+        
+        <Route path="*" element={<Navigate to="/coach" replace />} />
+      </Routes>
     </Shell>
   );
 }

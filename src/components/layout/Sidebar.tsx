@@ -1,5 +1,6 @@
 import './layout.css';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   IconHome,
   IconEdit,
@@ -12,25 +13,31 @@ import {
 
 export interface SidebarProps {
   tab: string;
-  onTab: (id: string) => void;
+  onTab?: (id: string) => void;
   darkMode?: boolean;
   onToggleDark?: () => void;
 }
 
 export function Sidebar({ tab, onTab, darkMode = false, onToggleDark }: SidebarProps) {
+  const navigate = useNavigate();
   const items = [
-    { id: 'coach',    label: 'Coach',           Icon: IconHome },
-    { id: 'ongoing',  label: 'Ongoing',         Icon: IconEdit },
-    { id: 'upcoming', label: 'Upcoming Events', Icon: IconCal },
-    { id: 'finished', label: 'Finished Tasks',  Icon: IconClip },
+    { id: 'coach',    path: '/coach',    label: 'Coach',           Icon: IconHome },
+    { id: 'ongoing',  path: '/ongoing',  label: 'Ongoing',         Icon: IconEdit },
+    { id: 'upcoming', path: '/upcoming', label: 'Upcoming Events', Icon: IconCal },
+    { id: 'finished', path: '/finished', label: 'Finished Tasks',  Icon: IconClip },
   ];
+
+  const handleTabClick = (id: string, path: string) => {
+    if (onTab) onTab(id);
+    navigate(path);
+  };
 
   return (
     <aside className="sidebar">
       <Wordmark />
       <nav className="nav">
-        {items.map(({ id, label, Icon: I }) => (
-          <button key={id} className={`nav-item ${tab === id ? 'active' : ''}`} onClick={() => onTab(id)}>
+        {items.map(({ id, path, label, Icon: I }) => (
+          <button key={id} className={`nav-item ${tab === id ? 'active' : ''}`} onClick={() => handleTabClick(id, path)}>
             <I /> {label}
           </button>
         ))}
