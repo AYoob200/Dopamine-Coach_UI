@@ -18,8 +18,6 @@ import { SignupScreen } from './components/auth/SignupScreen';
 import { SetupScreen } from './components/auth/SetupScreen';
 import { Task, Step, BackendRoadmapResponse } from './types/models';
 
-type Phase = 'entry' | 'roadmap' | 'focus' | 'rest' | 'gateway' | 'survey' | 'recovery' | 'finished';
-
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,19 +29,18 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   
   // Track auth status. In a real app, this would check tokens initially.
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('auth_token');
+  });
 
-  const [phase, setPhase] = useState<Phase>('entry');
   const [task, setTask] = useState<Partial<Task> | null>(null);
   const [steps, setSteps] = useState<Partial<Step>[]>([]);
   const [stepIdx, setStepIdx] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
-
   const [skipInterruption, setSkipInterruption] = useState(false);
 
-  const focusMode =
-    tab === 'coach' &&
-    (phase === 'focus' || phase === 'rest' || phase === 'gateway' || phase === 'survey' || phase === 'recovery');
+  const focusMode = location.pathname.includes('/coach/') && 
+    ['focus', 'rest', 'gateway', 'survey', 'recovery'].some(p => location.pathname.includes(p));
 
   const handleGo = async ({ title, body }: { title: string; body: string }) => {
     try {
@@ -111,7 +108,10 @@ export default function App() {
         steps: steps as Step[],
         sessionMetadata
       });
-      setPhase('roadmap');
+      setSteps(steps);
+      setStepIdx(0);
+      // Navigate to roadmap view
+      navigate('/coach/roadmap');
     } catch (error) {
       console.error('Error generating roadmap:', error);
       // Fallback to empty state or show error UI
@@ -121,7 +121,7 @@ export default function App() {
   const handleStart = (r: Partial<Step>[]) => {
     setSteps(r);
     setStepIdx(0);
-    setPhase('focus');
+    navigate('/coach/focus');
   };
 
   // Step complete → skip gateway if hyperfocus was used, otherwise go to survey
@@ -129,43 +129,43 @@ export default function App() {
     if (skipInterruption) {
       setSkipInterruption(false);
       if (stepIdx + 1 >= steps.length) {
-        setPhase('entry');
         setTask(null);
         setStepIdx(0);
+        navigate('/coach');
       } else {
         setStepIdx(prev => prev + 1);
-        setPhase('focus');
+        navigate('/coach/focus');
       }
     } else {
-      setPhase('gateway');
+      navigate('/coach/gateway');
     }
   };
-  const restDone = () => setPhase('recovery');
+  const restDone = () => navigate('/coach/recovery');
 
   const startSurvey = () => {
     setAnswers([]);
-    setPhase('survey');
+    navigate('/coach/survey');
   };
 
   const surveyDone = (a: number[]) => {
     setAnswers(a);
-    setPhase('rest');
+    navigate('/coach/rest');
   };
 
   const afterRecovery = () => {
     if (stepIdx + 1 >= steps.length) {
-      setPhase('entry');
       setTask(null);
       setStepIdx(0);
+      navigate('/coach');
     } else {
       setStepIdx(stepIdx + 1);
-      setPhase('focus');
+      navigate('/coach/focus');
     }
   };
   const endSession = () => {
-    setPhase('entry');
     setTask(null);
     setStepIdx(0);
+    navigate('/coach');
   };
 
   const handleHyperFocus = () => {
@@ -178,7 +178,11 @@ export default function App() {
       <Routes>
         <Route path="/login" element={
           <LoginScreen 
-            onLogin={() => { setIsAuthenticated(true); navigate('/coach'); }}
+            onLogin={() => { 
+              setIsAuthenticated(true); 
+              localStorage.setItem('auth_token', 'logged_in');
+              navigate('/coach'); 
+            }}
             onSignUp={() => navigate('/signup')}
             onGoogleSignIn={() => navigate('/setup')}
           />
@@ -192,7 +196,11 @@ export default function App() {
         } />
         <Route path="/setup" element={
           <SetupScreen 
-            onSetupComplete={() => { setIsAuthenticated(true); navigate('/coach'); }}
+            onSetupComplete={() => { 
+              setIsAuthenticated(true); 
+              localStorage.setItem('auth_token', 'setup_complete');
+              navigate('/coach'); 
+            }}
           />
         } />
       </Routes>
@@ -210,36 +218,40 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/coach" replace />} />
         
-        <Route path="/coach" element={
-          <>
-            {phase === 'entry' && <CoachScreen onGo={handleGo} />}
-            {phase === 'roadmap' && <RoadmapScreen task={task || {}} onStart={handleStart} />}
-            {phase === 'focus' && steps.length > 0 && (
-              <FocusScreen
-                stepTitle={steps[stepIdx]?.title || 'Focus'}
-                step={steps[stepIdx]}
-                onHyperFocus={handleHyperFocus}
-                isHyperFocusActive={skipInterruption}
-                onHyperFocusDeactivate={() => setSkipInterruption(false)}
-                onComplete={completeStep}
-                onEnd={endSession}
-                onRestart={() => setPhase('focus')}
-                onAddTime={() => {}}
-              />
-            )}
-            {phase === 'gateway' && <SurveyGateway onStart={startSurvey} />}
-            {phase === 'survey' && <SurveyScreen onDone={surveyDone} />}
-            {phase === 'rest' && <RestScreen onDone={restDone} />}
-            {phase === 'recovery' && (
-              <RecoveryScreen
-                answers={answers}
-                onContinue={afterRecovery}
-                isLast={stepIdx + 1 >= steps.length}
-              />
-            )}
-          </>
+        {/* Coach Screen Routes */}
+        <Route path="/coach" element={<CoachScreen onGo={handleGo} />} />
+        <Route path="/coach/roadmap" element={
+          task ? <RoadmapScreen task={task} onStart={handleStart} /> : <Navigate to="/coach" replace />
+        } />
+        <Route path="/coach/focus" element={
+          steps.length > 0 ? (
+            <FocusScreen
+              stepTitle={steps[stepIdx]?.title || 'Focus'}
+              step={steps[stepIdx]}
+              onHyperFocus={handleHyperFocus}
+              isHyperFocusActive={skipInterruption}
+              onHyperFocusDeactivate={() => setSkipInterruption(false)}
+              onComplete={completeStep}
+              onEnd={endSession}
+              onRestart={() => navigate('/coach/focus')}
+              onAddTime={() => {}}
+            />
+          ) : <Navigate to="/coach" replace />
+        } />
+        <Route path="/coach/gateway" element={<SurveyGateway onStart={startSurvey} />} />
+        <Route path="/coach/survey" element={<SurveyScreen onDone={surveyDone} />} />
+        <Route path="/coach/rest" element={<RestScreen onDone={restDone} />} />
+        <Route path="/coach/recovery" element={
+          steps.length > 0 ? (
+            <RecoveryScreen
+              answers={answers}
+              onContinue={afterRecovery}
+              isLast={stepIdx + 1 >= steps.length}
+            />
+          ) : <Navigate to="/coach" replace />
         } />
 
+        {/* Tab Routes */}
         <Route path="/ongoing" element={
           <OngoingTab
             onStartWork={(t, startIdx) => {
@@ -247,7 +259,7 @@ export default function App() {
               setTask({ title: t.title, description: t.description });
               setSteps(t.steps || []);
               setStepIdx(Math.max(0, startIdx));
-              setPhase('focus');
+              navigate('/coach/focus');
             }}
           />
         } />
@@ -255,7 +267,6 @@ export default function App() {
         <Route path="/upcoming" element={
           <UpcomingTab
             onLaunchTask={(t) => {
-              navigate('/coach');
               handleGo({ title: t.title || '', body: t.description || '' });
             }}
           />
